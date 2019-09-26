@@ -76,16 +76,16 @@ void autonomous() {}
 void opcontrol() {
 	pros::Controller master(pros::E_CONTROLLER_MASTER);
 
-	pros::Motor FrontRight(1, AbstractMotor::gearset::blue, true);
-	pros::Motor CenterRight(2, AbstractMotor::gearset::blue, true);
-	pros::Motor BackRight(3, AbstractMotor::gearset::blue, true);
+	okapi::Motor FrontRight(1, true, AbstractMotor::gearset::blue, AbstractMotor::encoderUnits::degrees);
+	okapi::Motor CenterRight(2, true, AbstractMotor::gearset::blue, AbstractMotor::encoderUnits::degrees);
+	okapi::Motor BackRight(3, true, AbstractMotor::gearset::blue, AbstractMotor::encoderUnits::degrees);
 
-	pros::Motor FrontLeft(11, AbstractMotor::gearset::blue, true);
-	pros::Motor CenterLeft(12, AbstractMotor::gearset::blue, true);
-	pros::Motor BackLeft(13, AbstractMotor::gearset::blue, true);
+	okapi::Motor FrontLeft(11, false, AbstractMotor::gearset::blue, AbstractMotor::encoderUnits::degrees);
+	okapi::Motor CenterLeft(12, false, AbstractMotor::gearset::blue, AbstractMotor::encoderUnits::degrees);
+	okapi::Motor BackLeft(13, false, AbstractMotor::gearset::blue, AbstractMotor::encoderUnits::degrees);
 
-	okapi::MotorGroup driveTrainLeft(std::initializer_list<Motor>({FrontLeft, CenterRight, BackRight}));
-	okapi::MotorGroup driveTrainRight({FrontRight, CenterRight, BackRight});
+	// okapi::MotorGroup driveTrainLeft({FrontLeft, CenterRight, BackRight});
+	// okapi::MotorGroup driveTrainRight({FrontRight, CenterRight, BackRight});
 
 	// driveTrainLeft.
 
@@ -96,8 +96,14 @@ void opcontrol() {
 		int left = master.get_analog(ANALOG_LEFT_Y);
 		int right = master.get_analog(ANALOG_RIGHT_Y);
 
-		driveTrainLeft.move()
-		right_mtr = right;
+		FrontLeft.move(left);
+		CenterLeft.move(left);
+		BackLeft.move(left);
+
+		FrontRight.move(right);
+		CenterRight.move(right);
+		BackRight.move(right);
+
 		pros::delay(20);
 	}
 }
