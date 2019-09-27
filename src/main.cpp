@@ -74,7 +74,9 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	pros::Controller master(pros::E_CONTROLLER_MASTER);
+	okapi::Controller master(okapi::ControllerId::master);
+
+	//Drive Train Def
 
 	okapi::Motor FrontRight(1, true, AbstractMotor::gearset::blue, AbstractMotor::encoderUnits::degrees);
 	okapi::Motor CenterRight(2, true, AbstractMotor::gearset::blue, AbstractMotor::encoderUnits::degrees);
@@ -84,25 +86,40 @@ void opcontrol() {
 	okapi::Motor CenterLeft(12, false, AbstractMotor::gearset::blue, AbstractMotor::encoderUnits::degrees);
 	okapi::Motor BackLeft(13, false, AbstractMotor::gearset::blue, AbstractMotor::encoderUnits::degrees);
 
-	// okapi::MotorGroup driveTrainLeft({FrontLeft, CenterRight, BackRight});
-	// okapi::MotorGroup driveTrainRight({FrontRight, CenterRight, BackRight});
+	okapi::MotorGroup driveTrainLeft({FrontLeft, CenterRight, BackRight});
+	okapi::MotorGroup driveTrainRight({FrontRight, CenterRight, BackRight});
 
-	// driveTrainLeft.
+	//Arm Def
+
+	okapi::Motor ArmRight(4, true, okapi::AbstractMotor::gearset::green);
+	okapi::Motor ArmLeft(5, false, okapi::AbstractMotor::gearset::green);
 
 	while (true) {
 		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
 		                 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
 		                 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
-		int left = master.get_analog(ANALOG_LEFT_Y);
-		int right = master.get_analog(ANALOG_RIGHT_Y);
+		
+		int left = master.getAnalog(okapi::ControllerAnalog::leftY);
+		int right = master.getAnalog(okapi::ControllerAnalog::rightY);
 
-		FrontLeft.move(left);
-		CenterLeft.move(left);
-		BackLeft.move(left);
+		driveTrainLeft.moveVelocity(left*600);
+		driveTrainRight.moveVelocity(right*600);
 
-		FrontRight.move(right);
-		CenterRight.move(right);
-		BackRight.move(right);
+		bool rightArmUp = master.getDigital(okapi::ControllerDigital::R1);
+		bool rightArmDown = master.getDigital(okapi::ControllerDigital::R2);
+
+		bool leftArmUp = master.getDigital(okapi::ControllerDigital::L1);
+		bool leftArmDown = master.getDigital(okapi::ControllerDigital::L2);
+
+		if(rightArmUp)
+			ArmRight.moveVelocity(100);
+		else if(rightArmDown)
+			ArmRight.moveVelocity(-100);
+
+		if(leftArmUp)
+			ArmLeft.moveVelocity(100);
+		else if(leftArmDown)
+			ArmLeft.moveVelocity(-100);
 
 		pros::delay(20);
 	}
